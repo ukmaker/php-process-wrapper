@@ -1,11 +1,15 @@
 <?php
+use UK\CO\UKMaker\ProcessWrapper\ProcessWrapper;
+use UK\CO\UKMaker\ProcessWrapper\ChildProcess;
+use UK\CO\UKMaker\ProcessWrapper\IProcessWrapperEventHandler;
+use UK\CO\UKMaker\ProcessWrapper\RespawningEventHandler;
 
-require_once __DIR__."/ProcessWrapper.php";
-require_once __DIR__."/ChildProcess.php";
-require_once __DIR__."/IProcessWrapperEventHandler.php";
-require_once __DIR__."/RespawningEventHandler.php";
-require_once __DIR__."/StatisticsGatheringEventHandler.php";
+$sRoot = __DIR__.'/../../lib/UK/CO/UKMaker/ProcessWrapper';
 
+require_once $sRoot."/ProcessWrapper.php";
+require_once $sRoot."/ChildProcess.php";
+require_once $sRoot."/IProcessWrapperEventHandler.php";
+require_once $sRoot."/RespawningEventHandler.php";
 /**
 * Example script to demonstrate use of the ProcessWrapper
 **/
@@ -45,6 +49,5 @@ $oWrapper->addEventHandler($oHandler);
 $oStats = new StatisticsGatheringEventHandler(200);
 $oWrapper->addEventHandler($oStats);
 
-//$oWrapper->setRespawn(ProcessWrapper::RESPAWN_INITIAL);
 
 $oWrapper->run();

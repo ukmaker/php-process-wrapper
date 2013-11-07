@@ -13,7 +13,6 @@ require_once $sRoot."/ProcessWrapper.php";
 require_once $sRoot."/ChildProcess.php";
 require_once $sRoot."/IProcessWrapperEventHandler.php";
 require_once $sRoot."/RespawningEventHandler.php";
-require_once $sRoot."/CLI.php";
 
 $aParams = array(
 	'host' => 'ubuntu-G',
