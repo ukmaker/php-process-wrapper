@@ -12,8 +12,11 @@ class CLI {
 
 	private $oWrapper;
 	private $sLine;
-	
-	public function __construct(ProcessWrapper $oWrapper) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    public function __construct(ProcessWrapper $oWrapper) {
 		$this->oWrapper = $oWrapper;
 	}
 	
@@ -35,12 +38,13 @@ class CLI {
 	public function initStreams() {
 		stream_set_blocking(STDIN, false);
 	}
-	
-	public function dispatch() {
+
+
+    public function dispatch() {
 	
 		$aRead  = array(STDIN);
 		$aWrite = array();
-		$aError = array();
+		$aError = array(); // @todo unused?
 	
 		while(stream_select($aRead, $aWrite, $aErr, 0, 10000)) {
 		
@@ -53,8 +57,11 @@ class CLI {
 			}
 		}
 	}
-	
-	public function handleLine($sLine) {
+
+    /**
+     * @param string $sLine
+     */
+    public function handleLine($sLine) {
 	
 		$sLine = trim($sLine);
 	
@@ -69,6 +76,7 @@ class CLI {
 			case self::CMD_PS:
 			
 				$aStatus = $this->oWrapper->getChildren();
+                /** @var ChildProcess $oChild */
 				foreach($aStatus as $oChild) {
 					echo $oChild->getPid()." ".$oChild->getRuntime().' '.$oChild->getState()."\n";
 				}
@@ -77,7 +85,7 @@ class CLI {
 			
 			case self::CMD_KILL:
 				
-				$this->oWrapper->stopChild($sArg);
+				$this->oWrapper->stopChild($sArg); // @todo $sArg might be null if not set above;
 				break;
 			
 			case self::CMD_FORK:

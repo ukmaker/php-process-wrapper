@@ -1,5 +1,7 @@
 <?php
+
 namespace UK\CO\UKMaker\ProcessWrapper;
+
 class ProcessWrapper {
 
 	private $iInitialChildren;
@@ -22,8 +24,12 @@ class ProcessWrapper {
 	private $aEventHandlers = array();
 	
 	/**
-	* Construct a wrapper to handle creating new children using the given function
-	* An unlimited number of children can be started by setting $iMaxChildren to zero
+	 * Construct a wrapper to handle creating new children using the given function
+	 * An unlimited number of children can be started by setting $iMaxChildren to zero
+     *
+     * @param int $iInitialChildren
+     * @param int $iMaxChildren
+     * @param $fnCreateChild
 	**/
 	public function __construct($iInitialChildren, $iMaxChildren = 0, $fnCreateChild) {
 		$this->iInitialChildren = $iInitialChildren;
@@ -33,8 +39,11 @@ class ProcessWrapper {
 		// Install the signal handler
 		pcntl_signal(SIGCHLD, array($this, "systemSignalHandler"));
 	}
-	
-	public function addEventHandler(IProcessWrapperEventHandler $oHandler) {
+
+    /**
+     * @param IProcessWrapperEventHandler $oHandler
+     */
+    public function addEventHandler(IProcessWrapperEventHandler $oHandler) {
 		foreach($this->aEventHandlers as $oInstalledHandler) {
 			// don't install the same handler twice
 			if($oHandler === $oInstalledHandler) {
@@ -43,8 +52,11 @@ class ProcessWrapper {
 		}
 		$this->aEventHandlers[] = $oHandler;
 	}
-	
-	public function removeEventHandler(IProcessWrapperEventHandler $oHandler) {
+
+    /**
+     * @param IProcessWrapperEventHandler $oHandler
+     */
+    public function removeEventHandler(IProcessWrapperEventHandler $oHandler) {
 		foreach(array_keys($this->aEventHandlers) as $iIndex) {
 			$oInstalledHandler = $this->aEventHandlers[$iIndex];
 			if($oHandler === $oInstalledHandler) {
@@ -53,12 +65,18 @@ class ProcessWrapper {
 			}
 		}
 	}
-	
-	public function info($sMessage) {
+
+    /**
+     * @param string $sMessage
+     */
+    public function info($sMessage) {
 		echo "INFO: $sMessage\n";
 	}
-	
-	public function warn($sMessage) {
+
+    /**
+     * @param string $sMessage
+     */
+    public function warn($sMessage) {
 		echo "WARNING: $sMessage\n";
 	}
 	
@@ -76,14 +94,17 @@ class ProcessWrapper {
 			$this->startChild();
 		}
 	}
-	
+
 	public function monitor() {
 		while($this->dispatch()) {
 			usleep(100);
 		}
 	}
-	
-	public function dispatch() {
+
+    /**
+     * @return bool
+     */
+    public function dispatch() {
 		
 		// Allow any event handlers to queue births and deaths
 		$this->dispatchTick();
@@ -136,6 +157,7 @@ class ProcessWrapper {
 				$this->warn("Cannot get exit status of child $iPid, it has disappeared");
 			} else {
 
+                /** @var ChildProcess $oChild */
 				$oChild = $this->aChildren[$iPid];
 				unset($this->aChildren[$iPid]);
 				
@@ -157,54 +179,76 @@ class ProcessWrapper {
 	}
 	
 	public function dispatchStartup() {
+        /** @var IProcessWrapperEventHandler $oHandler */
 		foreach($this->aEventHandlers as $oHandler) {
 			$oHandler->handleWrapperStartup($this);
 		}
 	}
 	
 	public function dispatchTick() {
+        /** @var IProcessWrapperEventHandler $oHandler */
 		foreach($this->aEventHandlers as $oHandler) {
 			$oHandler->handleWrapperTick($this);
 		}
 	}
 	
 	public function dispatchShutdown() {
+        /** @var IProcessWrapperEventHandler $oHandler */
 		foreach($this->aEventHandlers as $oHandler) {
 			$oHandler->handleWrapperShutdown($this);
 		}
 	}
-	
-	public function dispatchChildBirth(ChildProcess $oChild) {
+
+    /**
+     * @param ChildProcess $oChild
+     */
+    public function dispatchChildBirth(ChildProcess $oChild) {
+        /** @var IProcessWrapperEventHandler $oHandler */
 		foreach($this->aEventHandlers as $oHandler) {
 			$oHandler->handleChildBirth($this, $oChild);
 		}
 	}
-	
-	public function dispatchChildDeath(ChildProcess $oChild) {
+
+    /**
+     * @param ChildProcess $oChild
+     */
+    public function dispatchChildDeath(ChildProcess $oChild) {
+        /** @var IProcessWrapperEventHandler $oHandler*/
 		foreach($this->aEventHandlers as $oHandler) {
 			$oHandler->handleChildDeath($this, $oChild);
 		}
 	}
 	
 	public function dispatchLife() {
+        /** @var ChildProcess $oChild */
 		foreach($this->aChildren as $oChild) {
+            /** @var IProcessWrapperEventHandler $oHandler */
 			foreach($this->aEventHandlers as $oHandler) {
 				$oHandler->handleChildLife($this, $oChild);
 			}
 		}
 	}
-	
-	public function getChildren() {
+
+    /**
+     * @return array
+     */
+    public function getChildren() {
 		return $this->aChildren;
 	}
-	
-	public function getChildCount() {
+
+    /**
+     * @return int
+     */
+    public function getChildCount() {
 		return count($this->aChildren);
 	}
-	
-	public function getLiveChildCount() {
+
+    /**
+     * @return int
+     */
+    public function getLiveChildCount() {
 		$iLiving = 0;
-		
+		/** @var ChildProcess $oChild */
 		foreach($this->aChildren as $oChild) {
 			if($oChild->isAlive()) {
 				$iLiving++;
@@ -213,8 +257,11 @@ class ProcessWrapper {
 		
 		return $iLiving + count($this->aBirths) + count($this->aIncubating);
 	}
-	
-	public function startChild() {
+
+    /**
+     * @return null|ChildProcess
+     */
+    public function startChild() {
 	
 		if($this->iMaxChildren > 0 && (count($this->aChildren) + count($this->aBirths)) >= $this->iMaxChildren) {
 			$this->warn('Cannot start a new child, '.(count($this->aChildren) + count($this->aBirths)).' children are already running');
@@ -238,9 +285,12 @@ class ProcessWrapper {
 			exit($iExitCode);
 		}
 	}
-	
-	public function incubate($fBirthdate) {
-		$this->aIncubating[] = $fBirthdate;
+
+    /**
+     * @param $fBirthDate
+     */
+    public function incubate($fBirthDate) {
+		$this->aIncubating[] = $fBirthDate;
 	}
 	
 	public function handleDeliveries() {
@@ -256,12 +306,20 @@ class ProcessWrapper {
 		
 		$this->aIncubating = $aNotDone;
 	}
-	
-	public function stopChild($iPid) {
+
+    /**
+     * @param int $iPid
+     */
+    public function stopChild($iPid) {
 		$this->signalChild($iPid, SIGQUIT);
 	}
-	
-	public function signalChild($iPid, $iSignal) {
+
+    /**
+     * @param int $iPid
+     * @param int $iSignal
+     * @return bool
+     */
+    public function signalChild($iPid, $iSignal) {
 		if($iSignal > 0 && $iPid > 0) {
 			return posix_kill($iPid, $iSignal) && pcntl_signal_dispatch();
 		} else {

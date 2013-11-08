@@ -8,7 +8,7 @@ class ChildProcess implements \JsonSerializable {
 	const STATE_EXITED_ABNORMALLY = 3;
 
 	private $fStartTime;
-	private $fStopTime = null;
+	private $fStopTime = null; // @todo unused?
 	private $iPid;
 	
 	private $iState = self::STATE_RUNNING;
@@ -30,36 +30,60 @@ class ChildProcess implements \JsonSerializable {
 	public function getRuntime() {
 		return microtime(true) - $this->fStartTime;
 	}
-	
-	public function getPid() {
+
+    /**
+     * @return int|null
+     */
+    public function getPid() {
 		return $this->iPid;
 	}
-	
-	public function setState($iState) {
+
+    /**
+     * @param int $iState
+     */
+    public function setState($iState) {
 		$this->iState = $iState;
 	}
-	
-	public function exitedNormally() {
+
+    /**
+     * @return int
+     */
+    public function exitedNormally() {
 		return $this->iState == self::STATE_EXITED_NORMALLY;
 	}
-	
-	public function getState() {
+
+    /**
+     * @return int
+     */
+    public function getState() {
 		return $this->iState;
 	}
-	
-	public function isAlive() {
+
+    /**
+     * @return bool
+     */
+    public function isAlive() {
 		return in_array($this->iState, array(self::STATE_RUNNING, self::STATE_STOPPED));
 	}
-	
-	public function setExitCode($iExitCode) {
+
+    /**
+     * @param int $iExitCode
+     */
+    public function setExitCode($iExitCode) {
 		$this->iExitCode = $iExitCode;
 	}
-	
-	public function getExitCode() {
+
+    /**
+     * @return int
+     */
+    public function getExitCode() {
 		return $this->iExitCode;
 	}
-	
-	public function jsonSerialize() {
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize() {
 		return array(
 			'startTime' => $this->fStartTime,
 			'state' => $this->iState,

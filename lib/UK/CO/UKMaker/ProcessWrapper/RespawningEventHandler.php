@@ -23,34 +23,52 @@ class RespawningEventHandler implements IProcessWrapperEventHandler {
 	private $iRespawnDelayMs;
 	private $fLastSpawnTime;
 	private $fLastScheduledDelivery = 0;
-	
-	public function __construct($iRespawn, $iRespawnDelayMs = 1000, $iFixedChildLimit = 1) {
+
+    /**
+     * @param int $iRespawn
+     * @param int $iRespawnDelayMs
+     * @param int $iFixedChildLimit
+     */
+    public function __construct($iRespawn, $iRespawnDelayMs = 1000, $iFixedChildLimit = 1) {
 		$this->setRespawn($iRespawn);
 		$this->iRespawnDelayMs = $iRespawnDelayMs;
 		$this->iFixedChildLimit = $iFixedChildLimit;
 	}
-	
-	public function setRespawn($iRespawn) {
+
+    /**
+     * @param int $iRespawn
+     * @throws \Exception
+     */
+    public function setRespawn($iRespawn) {
 		if(!in_array($iRespawn, array(self::RESPAWN_NEVER, self::RESPAWN_FIXED))) {
 			throw new \Exception('Illegal argument to setRespawn: '.$iRespawn);
 		}
 		
 		$this->iRespawn = $iRespawn;
 	}
-	
-	public function getRespawn() {
+
+    /**
+     * @return int
+     */
+    public function getRespawn() {
 		return $this->iRespawn;
 	}
-	
-	public function setRespawnDelayMs($iDelayMs) {
+
+    /**
+     * @param int $iDelayMs
+     */
+    public function setRespawnDelayMs($iDelayMs) {
 		$this->iRespawnDelayMs = $iDelayMs;
 	}
-	
-	public function getRespawnDelayMs() {
+
+    public function getRespawnDelayMs() {
 		return $this->iRespawnDelayMs;
 	}
-	
-	public function setFixedChildLimit($iLimit) {
+
+    /**
+     * @param int $iLimit
+     */
+    public function setFixedChildLimit($iLimit) {
 		$this->iFixedChildLimit = $iLimit;
 	}
 	
@@ -58,13 +76,23 @@ class RespawningEventHandler implements IProcessWrapperEventHandler {
 		return $this->iFixedChildLimit;
 	}
 
-	public function handleWrapperStartup(ProcessWrapper $oWrapper) {
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    public function handleWrapperStartup(ProcessWrapper $oWrapper) {
 	}
-	
-	public function handleWrapperShutdown(ProcessWrapper $oWrapper) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    public function handleWrapperShutdown(ProcessWrapper $oWrapper) {
 	}
-	
-	public function handleChildBirth(ProcessWrapper $oWrapper, ChildProcess $oChild) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     * @param ChildProcess $oChild
+     */
+    public function handleChildBirth(ProcessWrapper $oWrapper, ChildProcess $oChild) {
 		
 		$this->fLastSpawnTime = microtime(true);
 		
@@ -72,11 +100,18 @@ class RespawningEventHandler implements IProcessWrapperEventHandler {
 			$this->fLastScheduledDelivery = $this->fLastSpawnTime;
 		}
 	}
-	
-	public function handleChildDeath(ProcessWrapper $oWrapper, ChildProcess $oChild) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     * @param ChildProcess $oChild
+     */
+    public function handleChildDeath(ProcessWrapper $oWrapper, ChildProcess $oChild) {
 	}
-	
-	public function handleWrapperTick(ProcessWrapper $oWrapper) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    public function handleWrapperTick(ProcessWrapper $oWrapper) {
 	
 		if($this->iRespawn == self::RESPAWN_NEVER) {
 			return;
@@ -86,11 +121,18 @@ class RespawningEventHandler implements IProcessWrapperEventHandler {
 			$this->incubateChild($oWrapper);
 		}
 	}
-	
-	public function handleChildLife(ProcessWrapper $oWrapper, ChildProcess $oChild) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     * @param ChildProcess $oChild
+     */
+    public function handleChildLife(ProcessWrapper $oWrapper, ChildProcess $oChild) {
 	}
-		
-	protected function incubateChild($oWrapper) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    protected function incubateChild($oWrapper) {
 	
 		$fDelivery = $this->fLastScheduledDelivery + (((float)$this->iRespawnDelayMs) / 1000);
 		$oWrapper->info("Scheduling one child for delivery at $fDelivery");

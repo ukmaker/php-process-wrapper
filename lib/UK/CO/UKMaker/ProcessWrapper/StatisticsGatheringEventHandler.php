@@ -12,31 +12,52 @@ class StatisticsGatheringEventHandler implements IProcessWrapperEventHandler {
 	
 	private $iPrintTicks = 0;
 	private $iTicks = 0;
-	
-	public function __construct($iPrintTicks = 0) {
+
+    /**
+     * @param int $iPrintTicks
+     */
+    public function __construct($iPrintTicks = 0) {
 		$this->iPrintTicks = $iPrintTicks;
 	}
-	
-	public function getStartTime() {
+
+    /**
+     * @return mixed
+     */
+    public function getStartTime() {
 		return $this->fStartTime;
 	}
-	
-	public function getTotalBirths() {
+
+    /**
+     * @return int
+     */
+    public function getTotalBirths() {
 		return $this->iTotalBirths;
 	}
-	
-	public function getTotalDeaths() {
+
+    /**
+     * @return int
+     */
+    public function getTotalDeaths() {
 		return $this->iTotalDeaths;
 	}
 
-	public function handleWrapperStartup(ProcessWrapper $oWrapper) {
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    public function handleWrapperStartup(ProcessWrapper $oWrapper) {
 		$this->fStartTime = microtime(true);
 	}
-	
-	public function handleWrapperShutdown(ProcessWrapper $oWrapper) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    public function handleWrapperShutdown(ProcessWrapper $oWrapper) {
 	}
-	
-	public function handleWrapperTick(ProcessWrapper $oWrapper) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     */
+    public function handleWrapperTick(ProcessWrapper $oWrapper) {
 		if($this->iPrintTicks == 0) {
 			return;
 		}
@@ -48,14 +69,26 @@ class StatisticsGatheringEventHandler implements IProcessWrapperEventHandler {
 		}
 	}
 
-	public function handleChildBirth(ProcessWrapper $oWrapper, ChildProcess $oChild) {
+    /**
+     * @param ProcessWrapper $oWrapper
+     * @param ChildProcess $oChild
+     */
+    public function handleChildBirth(ProcessWrapper $oWrapper, ChildProcess $oChild) {
 		$this->iTotalBirths++;
 	}
-	
-	public function handleChildDeath(ProcessWrapper $oWrapper, ChildProcess $oChild) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     * @param ChildProcess $oChild
+     */
+    public function handleChildDeath(ProcessWrapper $oWrapper, ChildProcess $oChild) {
 		$this->iTotalDeaths++;
 	}
-	
-	public function handleChildLife(ProcessWrapper $oWrapper, ChildProcess $oChild) {
+
+    /**
+     * @param ProcessWrapper $oWrapper
+     * @param ChildProcess $oChild
+     */
+    public function handleChildLife(ProcessWrapper $oWrapper, ChildProcess $oChild) {
 	}
 }
